@@ -1,6 +1,7 @@
 var
 	gulp = require('gulp'),
-	sass = require('gulp-sass');
+	sass = require('gulp-sass'),
+	nunjucksRender = require('gulp-nunjucks-render');
 
 //Source and distribution folders
 var
@@ -31,11 +32,20 @@ var scss = {
 	}
 };
 
+//Our nunjucks source and destination folders: .nunjucks files
+var nunjucks = {
+	templates: '/src/templates/**/*.nunjucks',
+	homein: '/src/pages/index.nunjucks',
+	homeout: '/dist/',
+	in: '/src/pages/subpages/**/*.nunjucks',
+	out: '/dist/html'
+};
+
 //Copy bootstrap required fonts to dest
 gulp.task('fonts', function () {
 	return gulp
 		.src(fonts.in)
-		.pipe(gulp.dest(fonts.out));
+		.pipe(gulp.dest(fonts.out))
 });
 
 //Compile Sass
@@ -44,6 +54,22 @@ gulp.task('sass', ['fonts'], function () {
 		.pipe(sass(scss.sassOpts))
 		.pipe(gulp.dest(scss.out))
 });
+
+//Render Nunjucks templates
+gulp.task('nunjucks-home', function () {
+	nunjucksRender.nunjucks.configure([nunjucks.templates]);
+	return gulp.src(nunjucks.homein)
+		.pipe(nunjucksRender())
+		.pipe(gulp.dest(nunjucks.homeout))
+});
+
+gulp.task('nunjucks', function () {
+	nunjucksRender.nunjucks.configure([nunjucks.templates]);
+	return gulp.src(nunjucks.in)
+		.pipe(nunjucksRender())
+		.pipe(gulp.dest(nunjucks.out))
+});
+
 
 //Default task
 gulp.task('default', ['sass'], function () {
